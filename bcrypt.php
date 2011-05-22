@@ -615,8 +615,8 @@ $slen = strlen($s);
         $cdata = $this->bf_crypt_ciphertext;
 
         $clen = count($cdata);
-        print_r($this->bf_crypt_ciphertext);
-        print_r($cdata);
+       // print_r($this->bf_crypt_ciphertext);
+       // print_r($cdata);
         if ($logRounds < 4 || $logRounds > 31)
         {
             die("Invalid number of rounds");
@@ -642,18 +642,18 @@ $slen = strlen($s);
         //print_r($this->p);
         for ($i = 0; $i < $rounds; $i++)
         {
-            echo "Round ".$i.":\n\n";
+            //echo "Round ".$i.":\n\n";
             $this->key($password);
             $this->overflow_arrays();
-           print_r($this->p);
+         //  print_r($this->p);
 
             $this->key($salt);
             $this->overflow_arrays();
-            print_r($this->p);
+          //  print_r($this->p);
         }
 $this->overflow_arrays();
 
-         print_r($this->p);
+      //   print_r($this->p);
         //print_r($this->p);
       //  echo "d";
         for ($i = 0; $i < 64;$i++)
@@ -674,7 +674,7 @@ $this->overflow_arrays();
             $ret[$j++] = ($cdata[$i] & 0xff);
         }
 
-        print_r($this->p);
+     //   print_r($this->p);
     //    echo "f";
         return $ret;
     }
