@@ -12,24 +12,9 @@
 // WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-ini_set('max_execution_time', 300); 
+ini_set('max_execution_time', 300);
 include "bcrypt.php";
 $bcryptclass = new bcrypt();
-$in_str = 'testpassword';
-$passwordBytes = array();
-foreach (str_split($in_str) as $chr) {
-    $passwordBytes[] = ord($chr);
-}
-$passwordBytes[] = ord("\0");
-        print_r($passwordBytes);
-        $saltBytes = $bcryptclass->decode_base64("GhvM8sjk982j0ln.9.782",16);
-        print_r($saltBytes);
-        $hashed = $bcryptclass->crypt_raw($passwordBytes, $saltBytes, 6);
-        print_r($hashed);
-        echo $bcryptclass->encode_base64($hashed, (6 * 4) - 1);
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+        echo $bcryptclass->hashpw("pemppassword", '$2a$06$thisissomerandomsaltxz');
 
 ?>

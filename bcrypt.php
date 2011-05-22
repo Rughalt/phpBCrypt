@@ -15,7 +15,10 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+///This algorithm can be rather slow on shared hosting, since it reguires considerable
+///amount of calculation power. However, for 6 round salt it should not time out.
 
+///Code is not complete yet, but using crypt_raw and encode_base64 you can already use it.
 class bcrypt
 {
 
@@ -407,27 +410,27 @@ $slen = strlen($s);
             $c2 = $this->char_64(ord($s[$offset++]));
             if ($c1 == -1 || $c2 == -1)
             {
-                echo "a";
+               // echo "a";
                 break;
             }
             $bytes[] = (($c1 << 2) | (($c2 & 0x30) >> 4));
             if (++$length >= $maximumLength || $offset >= strlen($s))
             {
-                echo "b::".$length."::".$offset."::";
+               // echo "b::".$length."::".$offset."::";
                 break;
             }
 
             $c3 = $this->char_64(ord($s[$offset++]));
             if ($c3 == -1)
             {
-                echo "c";
+               // echo "c";
                 break;
             }
 
             $bytes[] = ((($c2 & 0x0f) << 4) | (($c3 & 0x3c) >> 2));
             if (++$length >= $maximumLength || $offset >= strlen($s))
             {
-                echo "d";
+              //  echo "d";
                 break;
             }
 
@@ -575,6 +578,12 @@ $slen = strlen($s);
         }
     }
 
+    /// <summary>
+    /// Changes int from 32-bit signed presentation to float represenation
+    /// (since PHP does not support uint);
+    /// </summary>
+    /// <param name="i">Int to change</param>
+    /// <returns>Float with uint representation of int</returns>
     function overflow_int($i)
     {
         if ($i< 0)
@@ -582,6 +591,10 @@ $slen = strlen($s);
         return $i;
     }
 
+    /// <summary>
+    /// Does overflow_int for all integers in
+    /// two main cipher arrays
+    /// </summary>
     function overflow_arrays()
     {
          $plen = count($this->p); $slen = count($this->s);
@@ -633,7 +646,7 @@ $slen = strlen($s);
       //  echo "b";
         $this->eks_key($salt, $password);
 
-       
+
 
         $this->overflow_arrays();
 
@@ -687,74 +700,71 @@ $this->overflow_arrays();
     /// <param name="salt">The salt to hash with (perhaps generated
     /// using <c>BCrypt.GenerateSalt</c>).</param>
     /// <returns>The hashed password.</returns>
-    /*public static string HashPassword(string password, string salt)
+    function hashpw($password, $salt)
     {
-        if (password == null)
+        if ($password == null)
         {
-            throw new ArgumentNullException("password");
+            die ("Password not set");
         }
-        if (salt == null)
+        if ($salt == null)
         {
-            throw new ArgumentNullException("salt");
-        }
-
-        char minor = (char)0;
-
-        if (salt[0] != '$' || salt[1] != '2')
-        {
-            throw new ArgumentException("Invalid salt version");
+            die ("Salt not set");
         }
 
-        int offset;
-        if (salt[1] != '$')
+        $minor = 0;
+
+        if ($salt[0] != '$' || $salt[1] != '2')
         {
-            minor = salt[2];
-            if (minor != 'a' || salt[3] != '$')
+            die("Invalid salt version");
+        }
+
+        $offset;
+        if ($salt[1] != '$')
+        {
+            $minor = $salt[2];
+            if ($minor != 'a' || $salt[3] != '$')
             {
-                throw new ArgumentException("Invalid salt revision");
+            die("Invalid salt revision");
             }
-            offset = 4;
+            $offset = 4;
         }
         else
         {
-            offset = 3;
+            $offset = 3;
         }
-
         // Extract number of rounds
-        if (salt[offset + 2] > '$')
+        if ($salt[$offset + 2] != '$')
         {
-            throw new ArgumentException("Missing salt rounds");
+            die("Missing salt rounds.");
         }
 
-        int rounds = Int32.Parse(salt.Substring(offset, 2), NumberFormatInfo.InvariantInfo);
-
-        byte[] passwordBytes = Encoding.UTF8.GetBytes(password + (minor >= 'a' ? "\0" : String.Empty));
-        byte[] saltBytes = DecodeBase64(salt.Substring(offset + 3, 22),
-                                        BCRYPT_SALT_LEN);
-
-        BCrypt bcrypt = new BCrypt();
-
-        byte[] hashed = bcrypt.CryptRaw(passwordBytes, saltBytes, rounds);
-
-        StringBuilder rs = new StringBuilder();
-
-        rs.Append("$2");
-        if (minor >= 'a')
-        {
-            rs.Append(minor);
+        $rounds = (int)substr($salt,$offset, 2);
+        $passwordBytes = array();
+       $password = $password.($minor >= 'a' ? "\0" : "");
+        foreach (str_split($password) as $chr) {
+            $passwordBytes[] = ord($chr);
         }
-        rs.Append('$');
-        if (rounds < 10)
-        {
-            rs.Append('0');
-        }
-        rs.Append(rounds);
-        rs.Append('$');
-        rs.Append(EncodeBase64(saltBytes, saltBytes.Length));
-        rs.Append(EncodeBase64(hashed,
-                               (bf_crypt_ciphertext.Length * 4) - 1));
+         $saltBytes = $this->decode_base64(substr($salt,$offset+3,22),$this->BCRYPT_SALT_LEN);
+        $hashed = $this->crypt_raw($passwordBytes, $saltBytes, $rounds);
 
-        return rs.ToString();
+        $rs;
+
+         $rs = $rs."$2";
+        if ($minor >= 'a')
+        {
+            $rs = $rs.$minor;
+        }
+         $rs = $rs."$";
+        if ($rounds < 10)
+        {
+         $rs = $rs."0";
+        }
+         $rs = $rs.$rounds;
+         $rs = $rs."$";
+         $rs = $rs.$this->encode_base64($saltBytes, count($saltBytes));
+         $rs = $rs.$this->encode_base64($hashed,((count($this->bf_crypt_ciphertext) * 4) - 1));
+
+        return $rs;
     }
 
     /// <summary>
@@ -764,7 +774,7 @@ $this->overflow_arrays();
     /// hashing to apply. The work factor therefore increases as (2 **
     /// logRounds).</param>
     /// <returns>An encoded salt value.</returns>
-    function generate_salt($logRounds)
+    /*function generate_salt($logRounds)
     {
 
         byte[] randomBytes = new byte[BCRYPT_SALT_LEN];
