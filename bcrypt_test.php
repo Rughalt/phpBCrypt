@@ -1,7 +1,5 @@
 <?php
 // Copyright (c) 2011 Antoni Sobkowicz for PHP version
-// Copyright (c) 2006 Damien Miller <djm@mindrot.org>
-// Copyright (c) 2007 Derek Slager
 //
 // Permission to use, copy, modify, and distribute this software for any
 // purpose with or without fee is hereby granted, provided that the above
